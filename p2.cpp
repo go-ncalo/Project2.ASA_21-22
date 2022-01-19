@@ -77,8 +77,6 @@ int main() {
 
     graph = buildGraph(n, m);
 
-    graph = {{3}, {1}, {2}};
-
     if (validityCheck(graph) == false) {
         cout << '0' << endl;
     } else {
