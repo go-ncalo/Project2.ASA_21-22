@@ -13,6 +13,7 @@ vector<vector<int>> buildGraph(int n, int m) {
 
     for (int i = 0; i < m; i++) {
         if (scanf("%d %d", &parent, &child) != 2) {
+            cout << 0 << endl;
             break;
         }
 
