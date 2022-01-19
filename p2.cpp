@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <unordered_set>
 
 using namespace std;
 
@@ -60,7 +61,40 @@ bool validityCheck(vector<vector<int>> &graph) {
     return true;
 }
 
-int commonAncestral(vector<vector<int>> graph) {
+
+unordered_set<int> FindCommonAncestrals(vector<vector<int>> &graph, int vertexes[]) {
+    unordered_set<int> common;
+    vector<int> color(graph.size(), 0); // 0 - white, 1 - gray, 2 - black
+    vector<int> pi(graph.size(), NULL);
+
+    for(int i = 0; i < sizeof(vertexes); i++) {
+        if(color[vertexes[i]] == 0) {
+            visitVertex(graph, vertexes[i], common, vertexes[i]);
+        }
+        else {
+            if(pi[vertexes[i]] != vertexes[i]) {
+                if(common.find(vertexes[i]) != common.end()) {
+                    for(int j = 0; j < graph[vertexes[i]].size(); j++) {
+                        if(common.find(graph[vertexes[i]][j]) != common.end()) {
+                            common.erase(graph[vertexes[i]][j]);
+                        }
+                    }
+                    common.insert(vertexes[i]);
+                }
+            }
+        }
+
+    }
+}
+
+int commonAncestrals(vector<vector<int>> graph, int v1, int v2) {
+    vector<int> commonAncestral;
+    int vertexes[] = {v1-1, v2-1};
+
+    FindCommonAncestrals(graph, vertexes);
+
+    // convert unordered_set to ordered vector
+    // return said vector
     return 0;
 }
 
@@ -80,7 +114,7 @@ int main() {
     if (validityCheck(graph) == false) {
         cout << '0' << endl;
     } else {
-        commonAncestral(graph);
+        commonAncestrals(graph, v1, v2);
     }
     
     return 0;
