@@ -22,6 +22,16 @@ vector<vector<int>> buildGraph(int n, int m) {
         graph[child - 1].push_back(parent);
     }
 
+    /*
+    for (int i = 0; i < (int)graph.size(); i++) {
+        printf("%d-", i);
+        for(int j = 0; j < (int)graph[i].size(); j++) {
+            printf("%d,", graph[i][j]);
+        }
+        printf("\n");
+    }
+    */
+
     return graph;
 }
 
@@ -63,22 +73,44 @@ bool validityCheck(vector<vector<int>> &graph) {
     return true;
 }
 
-int visitVertex(vector<vector<int>> &graph, int v, unordered_set<int> &common, int V, vector<int> &color, vector<int> &pi) {
+int visitVertex(vector<vector<int>> &graph, int v, unordered_set<int> &common, int V, vector<int> &color, vector<int> &pi, vector<int> &marked, int markValue) {
     pi[V] = V;
     color[v] = 1;
+    //printf("visit: %d\n", v+1);
     for (size_t i = 0; i < graph[v].size(); i++) {
         int u = graph[v][i] - 1;
+        //printf("  visit adj: %d\n", u+1);
         if (color[u] == 0) {
-            visitVertex(graph, u, common, V, color, pi);
+            if (markValue == 0) {
+                visitVertex(graph, u, common, V, color, pi, marked, 0);
+            }
+            else {
+                visitVertex(graph, u, common, V, color, pi, marked, 1);
+            }
         } else {
-            if (pi[u] != V && (common.find(u) == common.end())) {
+            //printf("    already visited: %d\n", graph[v][i]);
+            if (marked[u] == 0 && pi[u] != V && (common.find(u) == common.end())) {
+                if (markValue == 1) {
+                    if (common.find(u) != common.end()) {
+                        common.erase(u);
+                    }
+                    marked[u] = 1;
+                }
+                /*
                 for (size_t j = 0; j < graph[u].size(); j++) {
                     int x = graph[u][j] - 1;
+                    printf("      find: %d\n", x);
                     if (common.find(x) != common.end()) {
                         common.erase(x);
                     }
+                    marked[x] = 1;
                 }
-                common.insert(u);
+                */
+                else {
+                    //printf("    inserted: %d\n", u);
+                    common.insert(u);
+                    visitVertex(graph, u, common, V, color, pi, marked, 1);
+                }
             }
         }
     }
@@ -91,10 +123,11 @@ unordered_set<int> FindCommonAncestrals(vector<vector<int>> &graph, int vertexes
     unordered_set<int> common;
     vector<int> color(graph.size(), 0); // 0 - white, 1 - gray, 2 - black
     vector<int> pi(graph.size());
+    vector<int> marked(graph.size(), 0); // 0 - can be smallest common, 1 - can't be
 
     for(int i = 0; i < 2; i++) {
         if(color[vertexes[i]] == 0) {
-            visitVertex(graph, vertexes[i], common, vertexes[i], color, pi);
+            visitVertex(graph, vertexes[i], common, vertexes[i], color, pi, marked, 0);
         }
         else {
             if(pi[vertexes[i]] != vertexes[i]) {
@@ -103,7 +136,9 @@ unordered_set<int> FindCommonAncestrals(vector<vector<int>> &graph, int vertexes
                     for(size_t j = 0; j < graph[vertexes[i]].size(); j++) {
                         if(common.find(graph[vertexes[i]][j]) != common.end()) {
                             common.erase(graph[vertexes[i]][j]);
+                            marked[graph[vertexes[i]][j]] = 1;
                         }
+                        marked[graph[vertexes[i]][j]] = 1;
                     }
                     common.insert(vertexes[i]);
                 }
